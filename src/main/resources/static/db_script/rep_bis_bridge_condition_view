@@ -1,0 +1,217 @@
+SELECT 
+    ROW_NUMBER() OVER () AS id,
+    bm.jrdcn_name,
+    bm.road_name,
+    bm.lkp_road_category,
+    bm.road_number,
+    bm.road_length::DOUBLE PRECISION AS road_length,
+    ROUND(
+        (bm.rsci_from_chainage::NUMERIC / (1 + bm.length_factor) + bm.rsi_offset)::NUMERIC, 
+        3
+    )::DOUBLE PRECISION AS location,
+    z.member_id,
+    z.bridge_id,
+    z.severity,
+    z.extent,
+    CASE
+        WHEN z.member_id LIKE 'WW%' AND z.comp_attr LIKE '%Spalling%' THEN 'Spalling'
+        WHEN z.member_id LIKE 'WW%' AND z.comp_attr LIKE '%Corrosion%' THEN 'Corrosion'
+        WHEN z.member_id LIKE 'WW%' AND z.comp_attr LIKE '%Cracking%' THEN 'Cracking'
+        ELSE z.comp_attr
+    END AS comp_attr,
+    z.sub_comp_slno,
+    z.sl_no::DOUBLE PRECISION AS sl_no,
+    z.remark,
+    TO_CHAR(
+        CASE
+            WHEN z.survey_date ~ '^\d{4}/\d{2}/\d{2}$' THEN to_date(z.survey_date, 'yyyy/mm/dd')
+            WHEN z.survey_date ~ '^\d{2}/\d{2}/\d{4}$' THEN to_date(z.survey_date, 'mm/dd/yyyy')
+            ELSE NULL
+        END, 'dd-Mon-YYYY'
+    ) AS survey_date,
+    z.set_id,
+    CASE 
+        WHEN bm.lkp_direction_flag = 'A' THEN 'Up'
+        WHEN bm.lkp_direction_flag = 'D' THEN 'Down'
+        ELSE 'Not Available' 
+    END AS road_direction
+FROM (
+    SELECT 
+        e.bridge_id,
+        e.member_id,
+        e.severity,
+        e.extent,
+        e.set_id,
+        e.comp_attr,
+        e.sub_comp_slno,
+        CASE
+            WHEN e.member_id LIKE '%P%' AND e.member_id NOT LIKE '%A%' AND LENGTH(e.member_id) > 2 THEN 1.6
+            WHEN e.member_id LIKE '%P%' AND e.member_id NOT LIKE '%A%' AND LENGTH(e.member_id) = 2 THEN 1.5
+            WHEN e.member_id LIKE 'A1%' AND e.member_id LIKE '%P%' AND e.member_id LIKE '%A%' THEN 2
+            WHEN e.member_id LIKE '%A%' AND e.member_id NOT LIKE '%P%' AND LENGTH(e.member_id) < 6 THEN 2.4
+            WHEN e.member_id LIKE '%P%' AND e.member_id NOT LIKE '%A%' AND LENGTH(e.member_id) < 6 THEN 2.4
+            WHEN e.member_id LIKE '%P%' AND e.member_id NOT LIKE '%A%' AND LENGTH(e.member_id) > 5 THEN 2.5
+            WHEN e.member_id LIKE '%A2' AND e.member_id LIKE '%P%' AND e.member_id LIKE '%A%' THEN 2.6
+            WHEN e.member_id LIKE '%2' AND e.member_id NOT LIKE '%P%' AND e.member_id LIKE '%A%' THEN 1.7
+            WHEN e.member_id LIKE '%1' AND e.member_id NOT LIKE '%P%' AND e.member_id LIKE '%A%' THEN 1
+            WHEN e.member_id = 'COND' THEN 0
+            WHEN e.member_id = 'WW1' THEN 20
+            WHEN e.member_id = 'WW2' THEN 21
+        END AS sl_no,
+        MAX(e.remark) OVER (PARTITION BY e.bridge_id) AS remark,
+        MAX(e.survey_date) OVER (PARTITION BY e.bridge_id) AS survey_date
+    FROM (
+        SELECT 
+            MAX(a.bc_component::TEXT) AS member_id,
+            MAX(a.bc_bridge_id) AS bridge_id,
+            MAX(a.bc_attrib_status::TEXT) AS severity,
+            MAX(a.bc_attrib_status::TEXT) AS extent,
+            MAX(a.bc_set_id) AS set_id,
+            COALESCE(MAX(b.attribute_diplay_name), a.bc_attribute_type::TEXT) AS comp_attr,
+            COALESCE(MAX(b.attribute_con_slno), NULL) AS sub_comp_slno,
+            MAX(
+                CASE
+                    WHEN a.bc_attribute_type::TEXT = 'FORREMARK' THEN a.bc_attrib_status
+                END
+            ) AS remark,
+            MAX(
+                CASE
+                    WHEN a.bc_attribute_type::TEXT = 'FORSURVEYDATE' THEN a.bc_attrib_status
+                END
+            ) AS survey_date
+        FROM bridge_condition a
+        LEFT JOIN bridge_lookup b 
+            ON (a.bc_attribute_type::TEXT || a.bc_attrib_status::TEXT) = (b.attribute_type || b.attribute_value)
+        WHERE a.is_deleted = FALSE
+        GROUP BY a.bc_component, a.bc_bridge_id, a.bc_set_id, a.bc_attribute_type
+    ) e
+) z
+LEFT JOIN (
+    SELECT 
+        rm.road_name,
+        rm.lkp_road_category,
+        rm.road_number,
+        rm.road_length,
+        bm_1.rsci_from_chainage,
+        bm_1.bridge_id,
+        rsi.rsi_offset,
+        rsi.length_factor,
+        rsi.lkp_direction_flag,
+        jm.jrdcn_name
+    FROM bridge_mst bm_1
+    LEFT JOIN road_segment_inf rsi 
+        ON bm_1.rsi_id = rsi.rsi_id 
+        AND rsi.is_deleted = FALSE
+    LEFT JOIN road_mst rm 
+        ON rsi.road_code = rm.road_code 
+        AND rm.is_deleted = FALSE
+    LEFT JOIN jrdcn_mst jm 
+        ON rsi.jrdcn_code = jm.jrdcn_code 
+        AND jm.is_deleted = FALSE
+    WHERE bm_1.is_deleted = FALSE
+) bm 
+ON z.bridge_id = bm.bridge_id;
+
+
+
+
+
+-----------------------------------------------------------------------------------------------
+
+
+ SELECT row_number() OVER () AS id,
+    bm.jrdcn_name,
+    bm.rsi_id,
+    bm.road_code,
+    bm.road_name,
+    bm.lkp_road_category,
+    bm.road_number,
+    bm.road_length::double precision AS road_length,
+    round((bm.rsci_from_chainage::numeric::double precision / (1::double precision + bm.length_factor) + bm.rsi_offset)::numeric, 3)::double precision AS location,
+    z.member_id,
+    z.bridge_id,
+    z.severity,
+    z.extent,
+        CASE
+            WHEN z.member_id ~~ 'WW%'::text AND z.comp_attr ~~ '%Spalling%'::text THEN 'Spalling'::text
+            WHEN z.member_id ~~ 'WW%'::text AND z.comp_attr ~~ '%Corrosion%'::text THEN 'Corrosion'::text
+            WHEN z.member_id ~~ 'WW%'::text AND z.comp_attr ~~ '%Cracking%'::text THEN 'Cracking'::text
+            ELSE z.comp_attr
+        END AS comp_attr,
+    z.sub_comp_slno,
+    z.sl_no::double precision AS sl_no,
+    z.remark,
+    to_char(
+        CASE
+            WHEN z.survey_date ~ '^\d{4}/\d{2}/\d{2}$'::text THEN to_date(z.survey_date, 'yyyy/mm/dd'::text)
+            WHEN z.survey_date ~ '^\d{2}/\d{2}/\d{4}$'::text THEN to_date(z.survey_date, 'mm/dd/yyyy'::text)
+            ELSE NULL::date
+        END::timestamp with time zone, 'dd-Mon-YYYY'::text) AS survey_date,
+    z.set_id,
+        CASE
+            WHEN bm.lkp_direction_flag::text = 'A'::text THEN 'Up'::text
+            WHEN bm.lkp_direction_flag::text = 'D'::text THEN 'Down'::text
+            ELSE 'Not Available'::text
+        END AS road_direction
+   FROM ( SELECT e.bridge_id,
+            e.member_id,
+            e.severity,
+            e.extent,
+            e.set_id,
+            e.comp_attr,
+            e.sub_comp_slno,
+                CASE
+                    WHEN e.member_id ~~ '%P%'::text AND e.member_id !~~ '%A%'::text AND length(e.member_id) > 2 THEN 1.6
+                    WHEN e.member_id ~~ '%P%'::text AND e.member_id !~~ '%A%'::text AND length(e.member_id) = 2 THEN 1.5
+                    WHEN e.member_id ~~ 'A1%'::text AND e.member_id ~~ '%P%'::text AND e.member_id ~~ '%A%'::text THEN 2::numeric
+                    WHEN e.member_id ~~ '%A%'::text AND e.member_id !~~ '%P%'::text AND length(e.member_id) < 6 THEN 2.4
+                    WHEN e.member_id ~~ '%P%'::text AND e.member_id !~~ '%A%'::text AND length(e.member_id) < 6 THEN 2.4
+                    WHEN e.member_id ~~ '%P%'::text AND e.member_id !~~ '%A%'::text AND length(e.member_id) > 5 THEN 2.5
+                    WHEN e.member_id ~~ '%A2'::text AND e.member_id ~~ '%P%'::text AND e.member_id ~~ '%A%'::text THEN 2.6
+                    WHEN e.member_id ~~ '%2'::text AND e.member_id !~~ '%P%'::text AND e.member_id ~~ '%A%'::text THEN 1.7
+                    WHEN e.member_id ~~ '%1'::text AND e.member_id !~~ '%P%'::text AND e.member_id ~~ '%A%'::text THEN 1::numeric
+                    WHEN e.member_id = 'COND'::text THEN 0::numeric
+                    WHEN e.member_id = 'WW1'::text THEN 20::numeric
+                    WHEN e.member_id = 'WW2'::text THEN 21::numeric
+                    ELSE NULL::numeric
+                END AS sl_no,
+            max(e.remark) OVER (PARTITION BY e.bridge_id) AS remark,
+            max(e.survey_date) OVER (PARTITION BY e.bridge_id) AS survey_date
+           FROM ( SELECT max(a.bc_component::text) AS member_id,
+                    max(a.bc_bridge_id) AS bridge_id,
+                    max(a.bc_attrib_status::text) AS severity,
+                    max(a.bc_attrib_status::text) AS extent,
+                    max(a.bc_set_id) AS set_id,
+                    COALESCE(max(b.attribute_diplay_name), a.bc_attribute_type::text) AS comp_attr,
+                    COALESCE(max(b.attribute_con_slno), NULL::double precision) AS sub_comp_slno,
+                    max(
+                        CASE
+                            WHEN a.bc_attribute_type::text = 'FORREMARK'::text THEN a.bc_attrib_status
+                            ELSE NULL::character varying
+                        END::text) AS remark,
+                    max(
+                        CASE
+                            WHEN a.bc_attribute_type::text = 'FORSURVEYDATE'::text THEN a.bc_attrib_status
+                            ELSE NULL::character varying
+                        END::text) AS survey_date
+                   FROM bridge_condition a
+                     LEFT JOIN bridge_lookup b ON (a.bc_attribute_type::text || a.bc_attrib_status::text) = (b.attribute_type || b.attribute_value)
+                  WHERE a.is_deleted = false
+                  GROUP BY a.bc_component, a.bc_bridge_id, a.bc_set_id, a.bc_attribute_type) e) z
+     LEFT JOIN ( SELECT rm.road_name,
+            rm.lkp_road_category,
+            rm.road_number,
+            rm.road_length,
+            bm_1.rsci_from_chainage,
+            bm_1.bridge_id,
+            rsi.rsi_id,
+            rsi.road_code,
+            rsi.rsi_offset,
+            rsi.length_factor,
+            rsi.lkp_direction_flag,
+            jm.jrdcn_name
+           FROM bridge_mst bm_1
+             LEFT JOIN road_segment_inf rsi ON bm_1.rsi_id = rsi.rsi_id AND rsi.is_deleted = false
+             LEFT JOIN road_mst rm ON rsi.road_code = rm.road_code AND rm.is_deleted = false
+             LEFT JOIN jrdcn_mst jm ON rsi.jrdcn_code = jm.jrdcn_code AND jm.is_deleted = false
+          WHERE bm_1.is_deleted = false) bm ON z.bridge_id = bm.bridge_id;

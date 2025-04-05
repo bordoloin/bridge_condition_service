@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bridge_condition" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="7896f7f3-7ea4-469c-a962-fcd30ad9efe8">
+	<property name="ireport.zoom" value="2.1435888100000438"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="macAddress" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="userId" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="dateTime" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="bridgeId" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="finYr" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+ id AS "id",
+ bridge_id AS "bridgeId",
+ set_id AS "setId",
+ jrdcn_name AS "jrdcnName",
+ road_code AS "roadCode",
+ rsi_id AS "rsiId",
+ road_name AS "roadName",
+ lkp_road_category AS "roadCategory",
+ road_number AS "roadNumber",
+ road_direction AS "direction",
+ location AS "location",
+ survey_date AS "surveyDate",
+ road_length AS "roadLength",
+ member_id AS "memberId",
+ comp_attr AS "attributeType",
+ severity AS "severity",
+ extent AS "extent",
+ sub_comp_slno AS "subComSlNo",
+ sl_no AS "slNo",
+ remark AS "remark"
+
+FROM rep_bis_bridge_condition_view
+WHERE bridge_id ::text = $P{bridgeId} ::text AND set_id::text = $P{finYr} ::text
+AND member_id <> 'COND'
+ORDER BY
+sl_no,
+member_id,
+sub_comp_slno;]]>
+	</queryString>
+	<field name="id" class="java.lang.Long"/>
+	<field name="bridgeId" class="java.lang.Long"/>
+	<field name="setId" class="java.lang.Long"/>
+	<field name="jrdcnName" class="java.lang.String"/>
+	<field name="roadCode" class="java.lang.Long"/>
+	<field name="rsiId" class="java.lang.Long"/>
+	<field name="roadName" class="java.lang.String"/>
+	<field name="roadCategory" class="java.lang.String"/>
+	<field name="roadNumber" class="java.lang.String"/>
+	<field name="direction" class="java.lang.String"/>
+	<field name="location" class="java.lang.Double"/>
+	<field name="surveyDate" class="java.lang.String"/>
+	<field name="roadLength" class="java.lang.Double"/>
+	<field name="memberId" class="java.lang.String"/>
+	<field name="attributeType" class="java.lang.String"/>
+	<field name="severity" class="java.lang.String"/>
+	<field name="extent" class="java.lang.String"/>
+	<field name="subComSlNo" class="java.lang.Double"/>
+	<field name="slNo" class="java.lang.Double"/>
+	<field name="remark" class="java.lang.String"/>
+	<filterExpression><![CDATA[!$F{memberId}.equals("COND")]]></filterExpression>
+	<group name="bridge_id">
+		<groupExpression><![CDATA[$F{bridgeId}]]></groupExpression>
+		<groupHeader>
+			<band height="71">
+				<staticText>
+					<reportElement x="3" y="2" width="48" height="11" uuid="a451775b-b153-4813-9c6b-8b15f6d9a9b4"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[District]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="86" y="2" width="464" height="11" uuid="5b36a53d-f9b2-4e5b-8892-f4f09c62ee96"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{jrdcnName}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement positionType="Float" x="3" y="57" width="48" height="11" uuid="8da3316d-eaf6-4eeb-9473-2e97bf83320e"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Remark]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="82" y="46" width="3" height="11" uuid="0a65c25f-2c14-49e8-9c17-c9420515df83"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="86" y="46" width="161" height="11" uuid="cf6b418d-d7ba-4a66-86a8-00ed782b1e8c"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{surveyDate}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="86" y="57" width="464" height="11" isPrintWhenDetailOverflows="true" uuid="dd7dade8-342b-4be6-ab44-02a89c438fa3"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{remark}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement positionType="Float" x="3" y="35" width="48" height="11" uuid="8e7e6588-9635-477b-a5fa-1c0fb995e66b"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Chainage ]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="82" y="57" width="3" height="11" uuid="fddbbddf-254d-473a-952d-be7577c6ba7f"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="86" y="13" width="464" height="11" uuid="38a7ed2b-d546-442e-af14-1a0418df98e5"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{roadName}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="82" y="2" width="3" height="11" uuid="bac1f651-2ac7-4bd6-bc23-4e82ce24fe01"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement positionType="Float" x="3" y="46" width="48" height="11" uuid="f67e21f9-978d-4fda-abbc-6d1026559f50"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Survey Date]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="86" y="24" width="464" height="11" uuid="5bd09911-362d-4a57-8675-0c160cf75c33"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{roadCategory}+"-"+$F{roadNumber}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="82" y="13" width="3" height="11" uuid="4d8cdcf7-7c77-4ee8-95bb-83335c28bcaa"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="3" y="13" width="48" height="11" uuid="df283405-d12b-45bf-a009-f8c673a73387"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Road Name]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement positionType="Float" x="86" y="35" width="161" height="11" uuid="ab4d0043-c604-49a3-a876-2db9141793e1"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{location}+" Km"]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement positionType="Float" x="82" y="35" width="3" height="11" uuid="6d3d7907-442e-4325-a169-ffd96be62827"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+				<line>
+					<reportElement positionType="FixRelativeToBottom" x="0" y="69" width="555" height="1" uuid="4829304a-72cf-4591-be4f-44c858ca37be"/>
+					<graphicElement>
+						<pen lineWidth="0.25"/>
+					</graphicElement>
+				</line>
+				<staticText>
+					<reportElement x="3" y="24" width="78" height="11" uuid="1745daa9-40f6-4ddd-ae54-ec781af1ddf1"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<text><![CDATA[Road Classification]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="82" y="24" width="3" height="11" uuid="77c867d6-dcdf-450a-9c4a-e58bd94a8331"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="component_group">
+		<groupExpression><![CDATA[$F{memberId}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="9" y="1" width="76" height="11" uuid="c1004ff8-4679-48ac-8d34-bd78e6520828">
+						<printWhenExpression><![CDATA[!$F{memberId}.equals("COND")]]></printWhenExpression>
+					</reportElement>
+					<textElement>
+						<font size="8" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{memberId}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement positionType="FixRelativeToBottom" x="0" y="13" width="555" height="1" uuid="33670b19-af9b-4089-8952-ac55805fc5c0"/>
+					<graphicElement>
+						<pen lineWidth="0.5"/>
+					</graphicElement>
+				</line>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="18" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="555" height="16" uuid="2deda44d-e4f6-4d3a-b4fd-d26d1018e30b"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[Bridge Condition]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="32" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="1" width="554" height="30" backcolor="#CCCCCC" uuid="39eeea8d-7254-42e8-b4a7-fbe8af649c84"/>
+			</rectangle>
+			<line>
+				<reportElement x="366" y="1" width="1" height="30" uuid="39ace940-4dec-4d77-bdd8-2dddeaccc091"/>
+			</line>
+			<staticText>
+				<reportElement x="200" y="2" width="166" height="28" uuid="731a66d6-f0bd-431e-90f9-e199f36fc22d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[SEVERITY]]></text>
+			</staticText>
+			<line>
+				<reportElement x="199" y="1" width="1" height="30" uuid="4954f6ae-ad86-4771-92a8-c8c63efa31e3"/>
+			</line>
+			<staticText>
+				<reportElement x="367" y="2" width="187" height="28" uuid="8dd22b0e-378f-4c3e-95e5-fae141882140"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[EXTENT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="2" width="198" height="28" uuid="4eaf2f26-26f0-489d-ac88-4695df030855"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" pdfFontName="Helvetica-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[MEMBER]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="22" y="1" width="177" height="11" uuid="7cc70ac5-3a98-4454-84d3-12b0599b1c72"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{attributeType}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="375" y="1" width="169" height="11" uuid="b58fb3c9-2bda-41f1-ab23-4546b3a80cdc"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{extent}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="210" y="1" width="150" height="11" uuid="ab5a7b85-46d1-4ed9-b844-8e6530098e54"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{severity}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="35" splitType="Stretch">
+			<staticText>
+				<reportElement x="298" y="2" width="256" height="11" uuid="2c528560-4f7f-4100-839a-8842595d057d"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Assam Road Asset Management System (ARAMS)]]></text>
+			</staticText>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="0" width="555" height="1" uuid="05d3a498-d7f9-4f3a-a9b2-ab2be76603f5"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="444" y="13" width="80" height="11" uuid="e7979a24-12fb-4e29-b57a-6eb99bb0b213"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" evaluationTime="Report" isBlankWhenNull="true">
+				<reportElement x="524" y="13" width="30" height="11" uuid="0f033ad8-dd10-4170-9c85-fb0b9a7a628e"/>
+				<textElement textAlignment="Left">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="24" width="60" height="11" uuid="a6f18bbf-1039-428b-981e-caa4bd192eae"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Generated by:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="2" width="247" height="22" uuid="9a0878c7-ccad-4b9a-950b-336b50669403"/>
+				<textElement verticalAlignment="Top">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Public Works Department,Govt. of Assam
+Consultant: LEA Associates South Asia Pvt. Ltd]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" x="60" y="24" width="494" height="11" uuid="6722f628-1639-49d3-8286-5c41da9f5c5e"/>
+				<textElement verticalAlignment="Top">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{userId}
++ ", MAC add: " + $P{macAddress}
++ ", Date Time: " + $P{dateTime}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>
