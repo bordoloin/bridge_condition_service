@@ -235,6 +235,7 @@ public class BridgeConditionController {
             byte[] reportBytes = bridgeConditionService.generateReportBridgeCondition(userIdLong, bridgeId, setId);
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"");
+            headers.add("Access-Control-Expose-Headers", "Content-Disposition");
             return ResponseEntity.ok().headers(headers).contentType(org.springframework.http.MediaType.APPLICATION_PDF).body(reportBytes);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
